@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Identifier - Sentiment Analyzer</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        html, body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, #1e293b 100%);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        /* Header & Navigation */
+        header {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: #cbd5e1;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        nav button:hover {
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Main Hero Section */
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #6366f1, #ec4899, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #a0aec0;
+            margin-bottom: 2rem;
+        }
+
+        /* Main Grid Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.5), rgba(30, 41, 59, 0.8));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), transparent);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .card-title i {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        /* Input Section */
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+
+        textarea, select {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.5);
+            color: #e2e8f0;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s;
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        textarea::placeholder {
+            color: #64748b;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.9rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Results Section */
+        .result-container {
+            display: none;
+            animation: slideUp 0.5s ease;
+        }
+
+        .result-container.show {
+            display: block;
+        }
+
+        .sentiment-badge {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .sentiment-badge.positive {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid #10b981;
+        }
+
+        .sentiment-badge.negative {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        .sentiment-badge.neutral {
+            background: rgba(107, 114, 128, 0.2);
+            color: #d1d5db;
+            border: 1px solid #6b7280;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .metric-label {
+            color: #a0aec0;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Score Bar */
+        .score-bar {
+            margin-top: 1.5rem;
+        }
+
+        .score-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.7rem;
+            font-size: 0.95rem;
+        }
+
+        .score-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--danger), var(--warning), var(--success));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        /* Statistics Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.4), rgba(30, 41, 59, 0.6));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #a0aec0;
+            font-size: 0.95rem;
+        }
+
+        /* History Section */
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .history-item {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            border-color: var(--primary);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .history-text {
+            flex: 1;
+            margin-right: 1rem;
+        }
+
+        .history-text p {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-sentiment {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .history-time {
+            color: #64748b;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(99, 102, 241, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                gap: 1rem;
+            }
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        .alert.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid #10b981;
+            color: #10b981;
+        }
+
+        .alert.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+
+        .alert.info {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid var(--primary);
+            color: #6366f1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-sparkles"></i>
+                <span>Emotion Identifier</span>
+            </div>
+            <nav>
+                <button onclick="refreshStats()" title="Refresh stats">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button onclick="clearHistory()" title="Clear history">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>🎯 Emotion Identifier</h1>
+            <p style="font-size: 0.9rem; color: #a0aec0; margin-top: 0.5rem;">Created by Muskan Shaikh</p>
+            <p>Analyze Instagram content sentiment with advanced emotion detection</p>
+        </div>
+        
+
+        <!-- Alert Messages -->
+        <div id="alert" class="alert"></div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Analyzer Card -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-pen-fancy"></i> Analyze Sentiment
+                </div>
+                
+                <div class="input-group">
+                    <label for="contentText">Enter Instagram Content</label>
+                    <textarea id="contentText" placeholder="Paste a comment, caption, hashtag, review, reply, or mention..."></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label for="contentType">Content Type</label>
+                    <select id="contentType">
+                        <option value="comment">Comment</option>
+                        <option value="caption">Caption</option>
+                        <option value="hashtag">Hashtag</option>
+                        <option value="review">Review</option>
+                        <option value="reply">Reply</option>
+                        <option value="mention">Mention</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" onclick="analyzeSentiment()">
+                    <i class="fas fa-wand-magic-sparkles"></i> Analyze Now
+                </button>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 1rem; color: #a0aec0;">Analyzing sentiment...</p>
+                </div>
+            </div>
+
+            <!-- Results Card -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-chart-pie"></i> Results
+                </div>
+                
+                <div id="resultContainer" class="result-container">
+                    <div id="sentimentBadge"></div>
+
+                    <div class="metrics-grid">
+                        <div class="metric">
+                            <div class="metric-label">Sentiment Score</div>
+                            <div class="metric-value" id="sentimentScore">-</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Confidence</div>
+                            <div class="metric-value" id="confidence">-</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Primary Emotion</div>
+                            <div class="metric-value" id="emotion" style="font-size: 1.2rem;">-</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Intensity</div>
+                            <div class="metric-value" id="intensity">-</div>
+                        </div>
+                    </div>
+
+                    <div class="score-bar">
+                        <div class="score-label">
+                            <span>Negative</span>
+                            <span id="scoreValue">0.0</span>
+                            <span>Positive</span>
+                        </div>
+                        <div class="score-track">
+                            <div class="score-fill" id="scoreFill" style="width: 50%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="noResults" style="text-align: center; color: #a0aec0; padding: 2rem 0;">
+                    <p><i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i></p>
+                    <p>Analyze some content to see results</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-title">
+                <i class="fas fa-bar-chart"></i> Statistics Overview
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-number" id="totalAnalyses">0</div>
+                    <div class="stat-label">Total Analyses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">😊</div>
+                    <div class="stat-number" id="positivePercent">0%</div>
+                    <div class="stat-label">Positive Sentiment</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">😞</div>
+                    <div class="stat-number" id="negativePercent">0%</div>
+                    <div class="stat-label">Negative Sentiment</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-number" id="avgConfidence">0%</div>
+                    <div class="stat-label">Avg Confidence</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-history"></i> Recent Analyses
+            </div>
+
+            <div class="history-list" id="historyList">
+                <div style="text-align: center; color: #a0aec0; padding: 2rem;">
+                    <p><i class="fas fa-inbox" style="font-size: 1.5rem; margin-bottom: 1rem; display: block;"></i></p>
+                    <p>No analyses yet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL
+        const API_BASE = 'http://localhost:5000/api';
+
+        // Show Alert
+        function showAlert(message, type = 'info') {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert show ${type}`;
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 5000);
+        }
+
+        // Analyze Sentiment
+        async function analyzeSentiment() {
+            const text = document.getElementById('contentText').value.trim();
+            const contentType = document.getElementById('contentType').value;
+
+            if (!text) {
+                showAlert('Please enter some text to analyze', 'error');
+                return;
+            }
+
+            const loading = document.getElementById('loading');
+            loading.classList.add('show');
+
+            try {
+                const response = await fetch(`${API_BASE}/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        content_type: contentType
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Analysis failed');
+                }
+
+                displayResults(data);
+                loadHistory();
+                refreshStats();
+                showAlert('Analysis complete!', 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error: ' + error.message, 'error');
+            } finally {
+                loading.classList.remove('show');
+            }
+        }
+
+        // Display Results
+        function displayResults(data) {
+            const resultContainer = document.getElementById('resultContainer');
+            const noResults = document.getElementById('noResults');
+
+            // Sentiment Badge
+            const sentiment = data.sentiment;
+            const badgeClass = sentiment === 'Positive' ? 'positive' : sentiment === 'Negative' ? 'negative' : 'neutral';
+            document.getElementById('sentimentBadge').innerHTML = 
+                `<div class="sentiment-badge ${badgeClass}">${sentiment} Sentiment</div>`;
+
+            // Metrics
+            document.getElementById('sentimentScore').textContent = data.sentiment_score.toFixed(2);
+            document.getElementById('confidence').textContent = (data.confidence * 100).toFixed(1) + '%';
+            document.getElementById('emotion').textContent = data.emotion;
+            document.getElementById('intensity').textContent = data.analysis_details.intensity;
+
+            // Score Bar
+            const scorePercent = ((data.sentiment_score + 1) / 2 * 100);
+            document.getElementById('scoreFill').style.width = scorePercent + '%';
+            document.getElementById('scoreValue').textContent = data.sentiment_score.toFixed(2);
+
+            // Show results, hide no-results
+            resultContainer.classList.add('show');
+            noResults.style.display = 'none';
+        }
+
+        // Load History
+        async function loadHistory() {
+            try {
+                const response = await fetch(`${API_BASE}/history?limit=10`);
+                const data = await response.json();
+
+                const historyList = document.getElementById('historyList');
+                
+                if (!data.history || data.history.length === 0) {
+                    historyList.innerHTML = `
+                        <div style="text-align: center; color: #a0aec0; padding: 2rem;">
+                            <p><i class="fas fa-inbox" style="font-size: 1.5rem; margin-bottom: 1rem; display: block;"></i></p>
+                            <p>No analyses yet</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                historyList.innerHTML = data.history.map(item => `
+                    <div class="history-item">
+                        <div class="history-text">
+                            <p class="history-sentiment">${item.sentiment} - ${item.emotion}</p>
+                            <p>${item.original_text.substring(0, 80)}${item.original_text.length > 80 ? '...' : ''}</p>
+                        </div>
+                        <div class="history-time">
+                            ${new Date(item.created_at).toLocaleDateString()}
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        // Refresh Statistics
+        async function refreshStats() {
+            try {
+                const response = await fetch(`${API_BASE}/statistics`);
+                const stats = await response.json();
+
+                document.getElementById('totalAnalyses').textContent = stats.total_analyses;
+                document.getElementById('positivePercent').textContent = stats.positive_percentage.toFixed(1) + '%';
+                document.getElementById('negativePercent').textContent = stats.negative_percentage.toFixed(1) + '%';
+                document.getElementById('avgConfidence').textContent = (stats.average_confidence * 100).toFixed(0) + '%';
+
+            } catch (error) {
+                console.error('Error refreshing stats:', error);
+            }
+        }
+
+        // Clear History
+        async function clearHistory() {
+            if (!confirm('Are you sure you want to clear all analysis history?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/clear-history`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+                showAlert('History cleared!', 'success');
+                loadHistory();
+                refreshStats();
+
+            } catch (error) {
+                showAlert('Error clearing history', 'error');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHistory();
+            refreshStats();
+
+            // Auto-refresh stats every 30 seconds
+            setInterval(refreshStats, 30000);
+        });
+
+        // Enter key to analyze
+        document.getElementById('contentText').addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                analyzeSentiment();
+            }
+        });
+    </script>
+</body>
+</html>
