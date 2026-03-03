@@ -1,0 +1,13 @@
+Flask==3.0.0
+Flask-CORS==4.0.0
+transformers==4.40.0
+torch==2.3.0
+google-generativeai==0.4.0
+python-dotenv==1.0.0
+numpy==1.24.3
+scikit-learn==1.4.0
+pandas==2.1.1
+requests==2.31.0
+gunicorn==21.2.0
+streamlit==1.35.0
+
